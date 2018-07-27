@@ -18,3 +18,6 @@ tags:
 
 #### 启动图
 - react-native-splash-screen
+
+#### Tab 切换
+- react-native-scrollable-tab-view
