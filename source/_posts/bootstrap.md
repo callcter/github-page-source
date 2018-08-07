@@ -2,7 +2,7 @@
 title: 放弃 Bootstrap
 tags:
   - bootstrap
-url: 430.html
+url: bootstrap.html
 id: 430
 categories:
   - 前端开发
