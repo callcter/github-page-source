@@ -9,4 +9,7 @@ categories:
 #### 问题总结
 
 ##### 当 ScrollTabView 嵌套在 ScrollView 中时内容不显示
-- 需要给 ScrollView 设置 contentContainerStyle={{flex: 1}}
+- 需要给 ScrollView 设置
+```jsx
+contentContainerStyle={{flex: 1}}
+```

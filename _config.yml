@@ -3,10 +3,10 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: blog
-subtitle:
+title: dreamser.com 技术博客
+subtitle: 每天进步一点点
 description:
-keywords:
+keywords: 博客
 author: dreamser.com
 language: zh-CN
 timezone:
