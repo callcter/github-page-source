@@ -6,9 +6,15 @@ tag:
 
 ### 配置
 
+#### Pod方式
+
+如果只使用 Pods 管理 Charts 跟 SwiftyJSON 两个包 [RN集成react-native-charts-wrapper不完全指南](http://www.kuajieyuan.com/post/H1xQuT5lQm)，如果全部使用 Pods 管理，详见 [react-native-charts-wrapper](https://github.com/wuxudong/react-native-charts-wrapper) 官方配置 IOS
+
+#### 非 Pod 方式
+
 - 推荐这篇文章：[React Native图表插件react-native-charts-wrapper集成教程](https://www.jianshu.com/p/432517c5b531)，文章也有不太对的地方，Bridging-Header 的配置要看组建的 readme，[react-native-charts-wrapper](https://github.com/wuxudong/react-native-charts-wrapper)
 - iOS 端配置推荐自己去 github 下载最新版的 charts 跟 swiftJson
-- 不推荐使用 pod，尤其是对前端来说
+- 如果是纯前端的同学，不太推荐使用 pod
 
 ### 使用文档
 
