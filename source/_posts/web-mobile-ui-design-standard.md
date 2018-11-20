@@ -12,11 +12,11 @@ tags:
 
 ### Android 手机屏幕常用尺寸
 
-![](http://7xw3o6.com1.z0.glb.clouddn.com/wp-content/uploads/2017/04/6.png)
+![](http://cdn.dreamser.com/wp-content/uploads/2017/04/6.png)
 
 ### iOS 手机屏幕尺寸
 
-![](http://7xw3o6.com1.z0.glb.clouddn.com/wp-content/uploads/2017/04/20141226185359140.png) 如果看完 Web UI 设计的方案还不满足，想要详细了解更多的手机分辨率以及 APP UI 的设计方案，我在这里推荐几篇文章：
+![](http://cdn.dreamser.com/wp-content/uploads/2017/04/20141226185359140.png) 如果看完 Web UI 设计的方案还不满足，想要详细了解更多的手机分辨率以及 APP UI 的设计方案，我在这里推荐几篇文章：
 
 *   [移动端尺寸基础知识](http://colachan.com/post/3435)
 *   [移动端H5页面的设计稿尺寸（上）](http://zikoman.lofter.com/post/3bf3bb_6da8d80)

@@ -38,15 +38,15 @@ date: 2018-04-26 08:57:31
 
 *   Add Files to "app"
 
-![](http://7xw3o6.com1.z0.glb.clouddn.com/wp-content/uploads/2018/04/屏幕快照-2018-04-26-上午8.28.34.png)
+![](http://cdn.dreamser.com/wp-content/uploads/2018/04/屏幕快照-2018-04-26-上午8.28.34.png)
 
 *   选择 bundle 文件，选择 Create folder reference，勾选 app，点击 Add 添加
 
-![](http://7xw3o6.com1.z0.glb.clouddn.com/wp-content/uploads/2018/04/屏幕快照-2018-04-26-上午8.32.17.png)
+![](http://cdn.dreamser.com/wp-content/uploads/2018/04/屏幕快照-2018-04-26-上午8.32.17.png)
 
 *   添加到项目下的文件必须是蓝色的
 
-![](http://7xw3o6.com1.z0.glb.clouddn.com/wp-content/uploads/2018/04/屏幕快照-2018-04-26-上午8.36.03.png)
+![](http://cdn.dreamser.com/wp-content/uploads/2018/04/屏幕快照-2018-04-26-上午8.36.03.png)
 
 ### jsCodeLocation
 
