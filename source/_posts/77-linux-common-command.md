@@ -65,3 +65,13 @@ date: 2017-04-01 18:50:02
 远程连接
 
     ssh -p 21 root@110.110.110.110  -- 以 root 账号连接地址为 110.110.110.110:21 的服务器
+
+### sed grep
+
+sed -i "" "s/com.agan_app/com.agan_app.prod/g" `grep com.agan_app -rl ./prod`
+
+### 参考文章
+
+- [linux 批量查找与替换](https://www.cnblogs.com/kongzhongqijing/articles/8459069.html)
+- [mac环境使用sed修改文件出错的解决方法](https://blog.csdn.net/fdipzone/article/details/51253955)
+- [Mac 运行sh文件，也就是传说中的shell脚本](https://blog.csdn.net/yusufolu9/article/details/53706269)
