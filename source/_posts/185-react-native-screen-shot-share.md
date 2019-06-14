@@ -2,9 +2,18 @@
 title: 'React Native 实现截图添加二维码分享功能'
 ---
 
+对一个 JSer 来说，用原生来实现一个功能着实不容易。但是，随着APP开发的深入，在许多场景下RN现成的组件已经不能满足我们的需求，不想受制于人就要自己动手。图像绘制、文件系统、通知、模块封装等等，虽然难但是收获也多，希望自己能够更深入原生开发的领域。
+
+### 效果展示
+<!-- more -->
+![效果展示GIF](https://cdn.dreamser.com/result-show-185.gif)
+
 ### 截屏监听功能
 
 #### iOS 截屏监听实现
+
+实现思路：添加iOS自带的UIApplicationUserDidTakeScreenshotNotification通知监听，捕捉到事件后绘制当前页面，保存返回文件地址
+
 ```objective-c
 // ScreenShotShare.h
 #import <React/RCTBridgeModule.h>
@@ -40,44 +49,44 @@ RCT_EXPORT_METHOD(startListener){
 }
 
 - (void)getScreenShot:(NSNotification *)notification{
-  NSLog(@"捕捉截屏事件");
   [self sendEventWithName:@"ScreenShotShare" body:[self screenImage]];
 }
 
+// 保存文件并返回文件路径
 - (NSDictionary *)screenImage{
   @try{
     UIImage *image = [UIImage imageWithData: [self imageDataScreenShot]];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask,YES);
-    
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *path =[[paths objectAtIndex:0]stringByAppendingPathComponent:PATH];
     if (![fileManager fileExistsAtPath:path]) {
       [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
     }
     long time = (long)[[NSDate new] timeIntervalSince1970];
-    NSString *filePath = [path stringByAppendingPathComponent:
-                          [NSString stringWithFormat:@"screen-capture-%ld.png", time]];
-    NSString *encodedImageStr = @"";
+    NSString *filePath = [path stringByAppendingPathComponent: [NSString stringWithFormat:@"screen-capture-%ld.png", time]];
+
     @try{
-      BOOL result =[UIImagePNGRepresentation(image)writeToFile:filePath atomically:YES]; // 保存成功会返回YES
-      encodedImageStr = [UIImagePNGRepresentation(image) base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+      BOOL result = [UIImagePNGRepresentation(image) writeToFile:filePath atomically:YES]; // 保存成功会返回YES
       if (result == YES) {
-        NSLog(@"保存成功");
+        NSLog(@"agan_app 保存成功。filePath：%@", filePath);
+        [[[UIApplication sharedApplication] keyWindow] endEditing:YES]; // 获取截屏后关闭键盘
+        return @{@"code": @200, @"uri": filePath};
       }
     }@catch(NSException *ex) {
-      NSLog(@"保存图片失败：%@", ex.description);
+      NSLog(@"agan_app 保存图片失败：%@", ex.description);
       filePath = @"";
+      return @{@"code": @500, @"errMsg": @"保存图片失败"};
     }
-    return @{@"code":@"200", @"base64":encodedImageStr, @"uri":filePath};
   }@catch(NSException *ex) {
-    NSLog(@"截屏失败：%@", ex.description);
-    return @{@"code":@"500", @"errMsg": @"截屏失败"};
+    NSLog(@"agan_app 截屏失败：%@", ex.description);
+    return @{@"code": @500, @"errMsg": @"截屏失败"};
   }
 }
 
+// 截屏
 - (NSData *)imageDataScreenShot{
-  CGSize imageSize = CGSizeZero;
-  imageSize = [UIScreen mainScreen].bounds.size;
+  CGSize imageSize = [UIScreen mainScreen].bounds.size;
   
   UIGraphicsBeginImageContextWithOptions(imageSize, NO, 0);
   CGContextRef context = UIGraphicsGetCurrentContext();
@@ -87,8 +96,10 @@ RCT_EXPORT_METHOD(startListener){
     CGContextConcatCTM(context, window.transform);
     CGContextTranslateCTM(context, -window.bounds.size.width*window.layer.anchorPoint.x, -window.bounds.size.height * window.layer.anchorPoint.y);
     if ([window respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)]){
+      NSLog(@"agan_app 使用drawViewHierarchyInRect:afterScreenUpdates:");
       [window drawViewHierarchyInRect:window.bounds afterScreenUpdates:YES];
     }else{
+      NSLog(@"agan_app 使用renderInContext:");
       [window.layer renderInContext:context];
     }
     CGContextRestoreGState(context);
@@ -103,50 +114,34 @@ RCT_EXPORT_METHOD(startListener){
 ```
 
 #### Android 截屏监听实现
+
+实现思路：通过 ContentObserver 获取文件变化捕获截图事件，捕获后为了去掉状态栏以及虚拟导航栏使用 normalShot 方法自己绘制当前页面然后保存，返回文件路径。
+
 ```java
 // ScreenShotSharePackage.java
-public class ScreenShotSharePackage implements ReactPackage {
-    @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        List<NativeModule> modules = new ArrayList<>();
-
-        modules.add(new ScreenShotShareModule(reactContext));
-
-        return modules;
-    }
-}
-// ScreenShotShareModule.java
 public class ScreenShotShareModule extends ReactContextBaseJavaModule {
-
     private static final String TAG = "screenshotshare";
-
+    private static final String NAVIGATION= "navigationBarBackground";
     private static final String[] KEYWORDS = {
             "screenshot", "screen_shot", "screen-shot", "screen shot",
             "screencapture", "screen_capture", "screen-capture", "screen capture",
             "screencap", "screen_cap", "screen-cap", "screen cap"
     };
 
+    private static Activity ma;
+    private ReactContext reactContext;
     /** 读取媒体数据库时需要读取的列 */
     private static final String[] MEDIA_PROJECTIONS =  {
             MediaStore.Images.ImageColumns.DATA,
             MediaStore.Images.ImageColumns.DATE_TAKEN,
     };
-
     /** 内部存储器内容观察者 */
     private ContentObserver mInternalObserver;
-
     /** 外部存储器内容观察者 */
     private ContentObserver mExternalObserver;
-
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
-    private ReactContext reactContext;
     public ScreenShotShareModule(ReactApplicationContext reContext){
         super(reContext);
         this.reactContext = reContext;
@@ -155,6 +150,10 @@ public class ScreenShotShareModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "ScreenShotShare";
+    }
+
+    public static void initScreenShotShareSDK(Activity activity){
+        ma = activity;
     }
 
     @ReactMethod
@@ -186,6 +185,12 @@ public class ScreenShotShareModule extends ReactContextBaseJavaModule {
         this.reactContext.getContentResolver().unregisterContentObserver(mExternalObserver);
     }
 
+    @ReactMethod
+    public void hasNavigationBar(Promise promise){
+        boolean navigationBarExisted =  isNavigationBarExist(ma);
+        promise.resolve(navigationBarExisted);
+    }
+
     private void handleMediaContentChange(Uri contentUri) {
         Cursor cursor = null;
         try {
@@ -215,13 +220,11 @@ public class ScreenShotShareModule extends ReactContextBaseJavaModule {
 
             // 处理获取到的第一行数据
             handleMediaRowData(data, dateTaken);
-
         } catch (Exception e) {
             WritableMap map = Arguments.createMap();
-            map.putString("code", "500");
+            map.putInt("code", 500);
             sendEvent(this.reactContext, "ScreenShotShare", map);
             e.printStackTrace();
-
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
@@ -233,15 +236,13 @@ public class ScreenShotShareModule extends ReactContextBaseJavaModule {
      * 处理监听到的资源
      */
     private void handleMediaRowData(String data, long dateTaken) {
-        WritableMap map = Arguments.createMap();
         if (checkScreenShot(data, dateTaken)) {
             Log.d(TAG, data + " " + dateTaken);
-            map.putString("code", "200");
-            map.putString("uri", data);
-            sendEvent(this.reactContext, "ScreenShotShare", map);
+            saveBitmap(normalShot(ma));
         } else {
             Log.d(TAG, "Not screenshot event");
-            map.putString("code", "500");
+            WritableMap map = Arguments.createMap();
+            map.putInt("code", 500);
             sendEvent(this.reactContext, "ScreenShotShare", map);
         }
     }
@@ -250,7 +251,6 @@ public class ScreenShotShareModule extends ReactContextBaseJavaModule {
      * 判断是否是截屏
      */
     private boolean checkScreenShot(String data, long dateTaken) {
-
         data = data.toLowerCase();
         // 判断图片路径是否含有指定的关键字之一, 如果有, 则认为当前截屏了
         for (String keyWork : KEYWORDS) {
@@ -281,6 +281,82 @@ public class ScreenShotShareModule extends ReactContextBaseJavaModule {
 
     public void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+    }
+
+    // 判断全面屏虚拟导航栏是否存在
+    public static  boolean isNavigationBarExist(Activity activity){
+        ViewGroup vp = (ViewGroup) activity.getWindow().getDecorView();
+        if (vp != null) {
+            for (int i = 0; i < vp.getChildCount(); i++) {
+                vp.getChildAt(i).getContext().getPackageName();
+                if (vp.getChildAt(i).getId()!= NO_ID && NAVIGATION.equals(activity.getResources().getResourceEntryName(vp.getChildAt(i).getId()))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // 当前APP内容截图
+    private static Bitmap normalShot(Activity activity) {
+        View decorView = activity.getWindow().getDecorView();
+        decorView.setDrawingCacheEnabled(true);
+        decorView.buildDrawingCache();
+
+        Rect outRect = new Rect();
+        decorView.getWindowVisibleDisplayFrame(outRect);
+        int statusBarHeight = outRect.top;//状态栏高度
+
+        Bitmap bitmap = Bitmap.createBitmap(decorView.getDrawingCache(),
+                0, statusBarHeight,
+                decorView.getMeasuredWidth(), decorView.getMeasuredHeight() - statusBarHeight);
+
+        decorView.setDrawingCacheEnabled(false);
+        decorView.destroyDrawingCache();
+        return bitmap;
+    }
+
+    // 获取当前APP图片存储路径
+    private String getSystemFilePath() {
+        String cachePath;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+                || !Environment.isExternalStorageRemovable()) {
+            cachePath = reactContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+//            cachePath = context.getExternalCacheDir().getPath(); // 返回文件 uri，而非path
+        } else {
+            cachePath = reactContext.getFilesDir().getAbsolutePath();
+//            cachePath = context.getCacheDir().getPath(); // 返回文件 uri，而非path
+        }
+        return cachePath;
+    }
+
+    // 保存截屏的bitmap为图片文件并返回路径
+    private void saveBitmap(Bitmap bitmap){
+        Long time = System.currentTimeMillis();
+        String path = getSystemFilePath() + "/screen-capture-" + time + ".png";
+        Log.d(TAG, path);
+        File filePic;
+        WritableMap map = Arguments.createMap();
+        try{
+            filePic = new File(path);
+            if (!filePic.exists()) {
+                filePic.getParentFile().mkdirs();
+                filePic.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(filePic);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+            map.putInt("code", 200);
+            map.putString("uri", filePic.getAbsolutePath());
+            sendEvent(this.reactContext, "ScreenShotShare", map);
+            // 强制关闭软键盘
+            ((InputMethodManager) ma.getSystemService(reactContext.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(ma.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }catch(IOException e){
+            e.printStackTrace();
+            map.putInt("code", 500);
+            sendEvent(this.reactContext, "ScreenShotShare", map);
+        }
     }
 }
 ```
@@ -423,11 +499,14 @@ export const shareImage = (url, platform) => {
 ```javascript
 // index.js
 import ScreenShotShareModal from './ScreenShotShareModal'
+import { ToastComponent } from 'react-native-pickers'
 // ...
 componentWillMount(){
   ScreenShotShareUtil.startListener(res => {
-    if(res && res.code === '200'){
+    if(res && res.code === 200){
       this.screenShotShareModal.show(res.uri)
+    }else{
+      ToastComponent.show('获取截图失败');
     }
   })
 }
@@ -569,3 +648,5 @@ const styles = StyleSheet.create({
 - [Android -- 超全的 File，Bitmap，Drawable，Uri, FilePath ,byte[]之间的转换方法](https://blog.csdn.net/wyg1230/article/details/79153641)
 - [Android之uri、file、path相互转化](https://blog.csdn.net/hust_twj/article/details/76665294)
 - [Android开发managedQuery方法过时如何解决](https://blog.csdn.net/qq_36317441/article/details/79278888)
+- [将bitmap对象保存到本地，返回保存的图片路径](https://blog.csdn.net/qq_31028313/article/details/55251370)
+- [Android普通截屏(不包括状态栏内容无状态栏占位仅包含应用程序)](https://blog.csdn.net/Kikitious_Du/article/details/78403892)
