@@ -2,6 +2,11 @@
 title: 'React Native 实现截图添加二维码分享功能'
 ---
 
+## 截图捕捉功能已经发布到 NPM，欢迎使用
+```
+npm i react-native-screenshotcatch
+```
+
 对一个 JSer 来说，用原生来实现一个功能着实不容易。但是，随着APP开发的深入，在许多场景下RN现成的组件已经不能满足我们的需求，不想受制于人就要自己动手。图像绘制、文件系统、通知、模块封装等等，虽然难但是收获也多，希望自己能够更深入原生开发的领域。
 
 ### 效果展示
@@ -443,7 +448,7 @@ let screenCaptureEmitter = undefined
 export default class ScreenShotShareUtil {
   static startListener(callback){
     const ScreenShotShare = NativeModules.ScreenShotShare
-    screenCaptureEmitter && screenCaptureEmitter.removeAllListeners('ScreenCapture')
+    screenCaptureEmitter && screenCaptureEmitter.removeAllListeners('ScreenShotShare')
     screenCaptureEmitter = Adapter.isIOS ? new NativeEventEmitter(ScreenShotShare) : DeviceEventEmitter
     screenCaptureEmitter.addListener('ScreenShotShare', (data) => {
       if(callback){
@@ -454,9 +459,18 @@ export default class ScreenShotShareUtil {
     return screenCaptureEmitter
   }
   static stopListener () {
-    screenCaptureEmitter && screenCaptureEmitter.removeAllListeners('ScreenCapture')
-    const ScreenCapture = NativeModules.ScreenCapture
-    return ScreenCapture.stopListener()
+    screenCaptureEmitter && screenCaptureEmitter.removeAllListeners('ScreenShotShare')
+    const screenCaptureEmitter = NativeModules.ScreenShotShare
+    return screenCaptureEmitter.stopListener()
+  }
+  static hasNavigationBar(){
+    if(!Adapter.isIOS){
+      screenCaptureEmitter && screenCaptureEmitter.removeAllListeners('ScreenShotShare')
+      const screenCaptureEmitter = NativeModules.ScreenShotShare
+      return screenCaptureEmitter.hasNavigationBar()
+    }else{
+      return false
+    }
   }
 }
 
@@ -650,3 +664,4 @@ const styles = StyleSheet.create({
 - [Android开发managedQuery方法过时如何解决](https://blog.csdn.net/qq_36317441/article/details/79278888)
 - [将bitmap对象保存到本地，返回保存的图片路径](https://blog.csdn.net/qq_31028313/article/details/55251370)
 - [Android普通截屏(不包括状态栏内容无状态栏占位仅包含应用程序)](https://blog.csdn.net/Kikitious_Du/article/details/78403892)
+- [Android全面屏虚拟导航栏适配](https://juejin.im/post/5bb5c4e75188255c72285b54)

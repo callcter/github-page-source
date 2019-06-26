@@ -1,5 +1,5 @@
 ---
-title: 'git 报错 fatal: refusing to merge unrelated histories'
+title: 'git 问题处理'
 tags:
   - git
 url: 439.html
@@ -9,7 +9,9 @@ categories:
 date: 2017-04-20 17:03:10
 ---
 
-### 场景
+## fatal: refusing to merge unrelated histories
+
+#### 场景
 
 本地创建项目，在打算向 github 提交的时候
 
@@ -31,3 +33,13 @@ date: 2017-04-20 17:03:10
 所以指令应该是：
 
     git pull origin master --allow-unrelated-histories
+
+## 修改 .gitignore 不生效
+
+原因是.gitignore只能忽略那些原来没有被track的文件，如果某些文件已经被纳入了版本管理中，则修改.gitignore是无效的。那么解决方法就是先把本地缓存删除（改变成未track状态），然后再提交
+
+```
+git rm -r --cached .
+git add .
+git commit -m 'update .gitignore'
+```
