@@ -27,13 +27,13 @@ code-push register
 code-push login // 登陆
 code-push logout // 注销
 code-push access-key ls // 列出登陆的token
-code-push access-key rm <accessKye> // 删除某个 access-key
+code-push access-key rm <accessKey> // 删除某个 access-key
 ```
 
 #### 添加 APP
 
 ```
-code-push app add ProjectName <ios|android> react-native
+code-push app add <projectName> <ios|android> react-native
 ```
 其他指令
 ```
@@ -42,6 +42,7 @@ code-push app remove // 或者 rm 在账号里移除一个app
 code-push app rename // 重命名一个存在app
 code-push app list // 或则 ls 列出账号下面的所有app
 code-push app transfer // 把app的所有权转移到另外一个账号
+code-push deployment ls <appName> -k // 查看 app 下的 development key
 ```
 
 #### 发布更新
