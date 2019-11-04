@@ -360,6 +360,13 @@ local_port = 6800
 remote_port = 6800
 ```
 
+### FTP
+
+```
+sudo apt install vsftpd
+
+```
+
 
 ## 参考
 
