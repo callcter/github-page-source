@@ -42,7 +42,7 @@ vim .ssh/authorized_keys
 
 # 添加内容
 
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDThKBl2f6TzTK06WQZONG85u7DbocECmA0ukW09wrB/S3wgmilp2DfOtuaCIkJA0ZqW7cUcuThtJwwyfp+kaWVnD/WHAyuvBqFBQHf9Rk5rc+lPhmvKvee8EVwKEnJoUETV0j3Y8ZGbt/4VQSYIfWLPiyWg0E1xQ0VStIMFX64GqcaVCnagEtW2mfF6ofZKtXRl2B4+4JPfRvnbIbh4e4CsOHgjdDEq63he4tneZ7rS3GBkFsv3h2Q0Ln6uyn1Df5G6TiKq5fqbKhWfkjxXB3b+f/2wKInKak0/2SX09U+VDifd0Oz/ORzaaX/wpoXMo6bhAuOdK/kQCwdg/s2oTHX callcter@liuhangdeMacBook-Pro.local
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCdLuMb00+2dfHUCNGJKvSSiEAuXhO8A/ZOVhAF3PhLPTQ6nZZkNl7j3xlRmcAqQmhm8z0xVmtpz9s8n2cAA6+efS715jMn/8wmnwcUZ6xnTAQZPqsuoD3rsGs6JIkHnkhHOqgkXa7XIKim47zR6miNEFQneOnukcsXd8mZmFNGiWzbn2+OCT6iWCI2/Sr0MvpCmuubU1tNgN15eYC87yjBrEFMpYRleF66FhJUx5Dr2xJxif3Kz4KB2Nz1U/p2KF+gx7MyudxJa0WTD+2NzxNkRXRllwU+by4uZ6OmftIvMWKPlkOs2zrqohVYHR/mY6ymic8eSmgBfo/nfimoR2Dt callcter@callcterdeMacBook-Pro.local
 ```
 
 ### 配置文件修改——免密登录
@@ -94,7 +94,7 @@ systemctl restart mysql
 #### NVM & NodeJs
 
 ```
-wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
 
 vim .zshrc
 
